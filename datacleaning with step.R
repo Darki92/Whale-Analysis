@@ -55,8 +55,9 @@ overallsecwithUTC <- function(datetime){
   return(seconds)
 }
 
-whaledivestats$enddescsec <- overallsecwithUTC(whaledivestats$enddesc)
-whaledivestats$begdescsec <- overallsecwithUTC(whaledivestats$begdesc)
+whaledivestats$begdivesec <- overallsecwithUTC(whaledivestats$begdesc)
+whaledivestats$enddivesec <- whaledivestats$begdivesec + whaledivestats$divetim
+
 
 #plot the time against lat and long
 
@@ -86,11 +87,11 @@ interpolationvalue <- function(tvec,time,argument,k){ #tvec is vector of timepoi
 }
 
 # calculation for the lat and long variables by linear interpolation in the dive set
-whaledivestats$beglat <- interpolationvalue(whaledivestats$begdescsec, whalegps$overallsec,whalegps$lat,10000000000)
-whaledivestats$beglong <- interpolationvalue(whaledivestats$begdescsec, whalegps$overallsec,whalegps$long,10000000000)
+whaledivestats$beglat <- interpolationvalue(whaledivestats$begdivesec, whalegps$overallsec,whalegps$lat,10000000000)
+whaledivestats$beglong <- interpolationvalue(whaledivestats$begdivesec, whalegps$overallsec,whalegps$long,10000000000)
 
-whaledivestats$endlat <- interpolationvalue(whaledivestats$enddescsec, whalegps$overallsec,whalegps$lat,10000000000)
-whaledivestats$endlong <- interpolationvalue(whaledivestats$enddescsec, whalegps$overallsec,whalegps$long,10000000000)
+whaledivestats$endlat <- interpolationvalue(whaledivestats$enddivesec, whalegps$overallsec,whalegps$lat,10000000000)
+whaledivestats$endlong <- interpolationvalue(whaledivestats$enddivesec, whalegps$overallsec,whalegps$long,10000000000)
 
 
 earth.dist <- function (long1, lat1, long2, lat2)

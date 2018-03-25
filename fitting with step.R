@@ -19,7 +19,7 @@ obs <- whaledata[(7:3583), c(5, 7, 8, 15)]
 
 ## function that converts 'natural' parameters (possibly constrained) to 'working' parameters (all of which are real-valued) - this is only necessary since I use the unconstrained optimizer nlm() below 
 # mu & kappa: von Mises distr.
-pn2pw <- function(mu1, mu2, mu3, mu4, sigma1, sigma2, sigma3, sigma4, gamma, pi){   #gamma as vector of offdiagonals
+pn2pw <- function(mu1, mu2, mu3, mu4, sigma1, sigma2, sigma3, sigma4, gamma){   #gamma as vector of offdiagonals
   for(i in 1:4){
     mu <- cbind(mu1, mu2, mu3, mu4)
     assign(paste0("tmu", i), log(mu[,i]))    
@@ -29,8 +29,7 @@ pn2pw <- function(mu1, mu2, mu3, mu4, sigma1, sigma2, sigma3, sigma4, gamma, pi)
     assign(paste0("tsigma", i), log(sigma[,i]))    
   } 
   tgamma <- qlogis(gamma)
-  tpi <- qlogis(pi)
-  parvect <- c(tmu1, tmu2, tmu3, tmu4,tsigma1, tsigma2, tsigma3, tsigma4, tgamma, tpi)
+  parvect <- c(tmu1, tmu2, tmu3, tmu4,tsigma1, tsigma2, tsigma3, tsigma4, tgamma)
   return(parvect)
 }
 
@@ -51,9 +50,8 @@ pw2pn <- function(parvect,N){     # parvect contains of mu, sigma as above, gamm
     gamma <- gamma/apply(gamma,1,sum)           
   }
   delta <- solve(t(diag(N)-gamma+1),rep(1,N))
-  pi <- plogis(parvect[((8*N+N*(N-1))+1):length(parvect)])
   return(list(mu1=mu1, mu2=mu2, mu3=mu3, mu4=mu4, sigma1=sigma1, sigma2=sigma2, sigma3=sigma3, sigma4=sigma4,
-              gamma=gamma, delta=delta, pi=pi))
+              gamma=gamma, delta=delta))
 }
 
 #Next I will write my own function to fit an HMM based on roland code
@@ -70,8 +68,6 @@ L<-function(parvect, obs, N){ # parvect as working parameters with (divetim,maxd
   sigma.step <- para$sigma4
   gamma <- matrix(para$gamma,N)
   delta <- c(para$delta)
-  pi <- para$pi
-  
   allprobs <- matrix(1,dim(obs)[1],N)
   #ind<-which(!is.na(obs$angle))    # angle has the most NA, but we can also exclude this observations before.
   ma <- matrix(1,dim(obs)[1],N) 
@@ -81,20 +77,14 @@ L<-function(parvect, obs, N){ # parvect as working parameters with (divetim,maxd
     ma[-ind,j]<- pgamma(obs$postdive.dur[-ind]+0.5,shape=mu.postdive.dur[j]^2/sigma.postdive.dur[j]^2,scale=sigma.postdive.dur[j]^2/mu.postdive.dur[j])-
       pgamma(obs$postdive.dur[-ind]-0.5,shape=mu.postdive.dur[j]^2/sigma.postdive.dur[j]^2,scale=sigma.postdive.dur[j]^2/mu.postdive.dur[j])
   }
-  ma2 <- matrix(1,dim(obs)[1],N) # including the zero inflation
-  for (j in 1:N) {
-    ind<-which(obs$step==0)
-    ma2[ind,j] <- pi[j]
-    ma2[-ind,j]<- (1-pi[j])*dgamma(obs$step[-ind], shape = mu.step[j]^2/sigma.step[j]^2, scale = sigma.step[j]^2/mu.step[j])
-  }
   for (j in 1:N){
     allprobs[,j] <-
       (pgamma(obs$divetim +0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j])-
-      pgamma(obs$divetim -0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j]))*
+         pgamma(obs$divetim -0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j]))*
       dgamma(obs$maxdep, shape = mu.maxdep[j]^2/sigma.maxdep[j]^2, scale = sigma.maxdep[j]^2/mu.maxdep[j])*
       ma[,j]*
-      ma2[,j]
-      #dgamma(obs$postdive.dur, shape = mu.postdive.dur[j]^2/sigma.postdive.dur[j]^2, scale = sigma.postdive.dur[j]^2/mu.postdive.dur[j])*
+      dgamma(obs$step[-ind], shape = mu.step[j]^2/sigma.step[j]^2, scale = sigma.step[j]^2/mu.step[j])
+    #dgamma(obs$postdive.dur, shape = mu.postdive.dur[j]^2/sigma.postdive.dur[j]^2, scale = sigma.postdive.dur[j]^2/mu.postdive.dur[j])*
   }
   foo <- delta%*%diag(allprobs[1,])
   l <- log(sum(foo))
@@ -109,24 +99,24 @@ L<-function(parvect, obs, N){ # parvect as working parameters with (divetim,maxd
 
 
 
-mle <- function(obs, mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0, pi0, N){
-  parvect <- pn2pw(mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0, pi0)
+mle <- function(obs, mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0, N){
+  parvect <- pn2pw(mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0)
   # obsl <- create_obslist(obs) 
   mod <- nlm(tsllk, parvect, obs, N, print.level = 2, iterlim = 1000, stepmax = 5) # replace L with tsllk
   pn <- pw2pn(mod$estimate, N)
   return(list(mu1 = pn$mu1, mu2 = pn$mu2, mu3 = pn$mu3, mu4 = pn$mu4, sigma1 = pn$sigma1, sigma2 = pn$sigma2, sigma3 = pn$sigma3, sigma4 = pn$sigma4,
-              gamma = pn$gamma, delta = pn$delta, pi=pn$pi, mllk = mod$minimum))
+              gamma = pn$gamma, delta = pn$delta, mllk = mod$minimum))
 }               
 
 
 # ohne splitfunktion
-mle <- function(obs, mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0, pi0, N){
-  parvect <- pn2pw(mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0, pi0)
+mle <- function(obs, mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0,N){
+  parvect <- pn2pw(mu01, mu02, mu03, mu04, sigma01, sigma02, sigma03, sigma04, gamma0)
   # obsl <- create_obslist(obs) 
   mod <- nlm(L, parvect, obs, N, print.level = 2, iterlim = 1000, stepmax = 5) # replace L with tsllk
   pn <- pw2pn(mod$estimate, N)
   return(list(mu1 = pn$mu1, mu2 = pn$mu2, mu3 = pn$mu3, mu4 = pn$mu4, sigma1 = pn$sigma1, sigma2 = pn$sigma2, sigma3 = pn$sigma3, sigma4 = pn$sigma4,
-              gamma = pn$gamma, delta = pn$delta, pi=pn$pi, mllk = mod$minimum))
+              gamma = pn$gamma, delta = pn$delta, mllk = mod$minimum))
 }   
 
 
@@ -178,23 +168,23 @@ fitmult <- function(obs, n_fits, N){
 ###########################
 # 2 states
 whale_mod2withstep <- mle(obs, c(30, 200), c(20, 80), c(100, 600), c(10, 1000),
-                         c(25, 70), c(10, 20), c(50, 90), c(50, 500), c(0.9, 0.8), c(0.25, 0.25), 2)
+                          c(25, 70), c(10, 20), c(50, 90), c(50, 500), c(0.9, 0.8), 2)
 
 # 3 states
 whale_mod3withstep <- mle(obs, c(30, 150, 250), c(20, 80, 110), c(50, 100, 600), c(10, 500, 1000),
-                  c(25, 60, 70), c(10, 20, 30), c(30, 90, 100), c(50, 100, 500), c(0.5, 0.4, 0.3, 0.2, 0.25, 0.1), c(0.25, 0.25, 0.25), 3)
+                          c(25, 60, 70), c(10, 20, 30), c(30, 90, 100), c(50, 100, 500), c(0.5, 0.4, 0.3, 0.2, 0.25, 0.1), 3)
 
 
 ## zufällig gezogene Startwerte:
 # 2 states
 whale_rmod2withstep <- mle(obs, c(runif(2, 1, 250)), c(runif(2, 1, 120)), c(runif(2, 1, 600)), c(runif(2, 1, 1000)),
-                   c(runif(2, 1, 100)), c(runif(2, 1, 50)), c(runif(2, 1, 100)), c(runif(2, 1, 500)), 
-                   c(runif(2, 0, 1)), c(runif(2, 0, 1)), 2)
+                           c(runif(2, 1, 100)), c(runif(2, 1, 50)), c(runif(2, 1, 100)), c(runif(2, 1, 500)), 
+                           c(runif(2, 0, 1)), 2)
 
 # 3 states
 whale_rmod3withstep <- mle(obs, c(runif(3, 1, 250)), c(runif(3, 1, 120)), c(runif(3, 1, 600)), c(runif(3, 1, 1000)),
-                   c(runif(3, 1, 100)), c(runif(3, 1, 50)), c(runif(3, 1, 100)), c(runif(3, 1, 500)), 
-                   c(runif(6, 0, 1)), c(runif(3, 0, 1)), 3)
+                           c(runif(3, 1, 100)), c(runif(3, 1, 50)), c(runif(3, 1, 100)), c(runif(3, 1, 500)), 
+                           c(runif(6, 0, 1)), 3)
 
 
 ## Dealing with lokal maxima

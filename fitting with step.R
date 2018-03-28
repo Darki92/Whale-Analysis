@@ -83,7 +83,7 @@ L<-function(parvect, obs, N){ # parvect as working parameters with (divetim,maxd
          pgamma(obs$divetim -0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j]))*
       dgamma(obs$maxdep, shape = mu.maxdep[j]^2/sigma.maxdep[j]^2, scale = sigma.maxdep[j]^2/mu.maxdep[j])*
       ma[,j]*
-      dgamma(obs$step[-ind], shape = mu.step[j]^2/sigma.step[j]^2, scale = sigma.step[j]^2/mu.step[j])
+      dgamma(obs$step, shape = mu.step[j]^2/sigma.step[j]^2, scale = sigma.step[j]^2/mu.step[j])
     #dgamma(obs$postdive.dur, shape = mu.postdive.dur[j]^2/sigma.postdive.dur[j]^2, scale = sigma.postdive.dur[j]^2/mu.postdive.dur[j])*
   }
   foo <- delta%*%diag(allprobs[1,])

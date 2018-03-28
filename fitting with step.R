@@ -9,8 +9,8 @@ require(moveHMM)
 setwd("C:/Users/Patrick/Desktop/Whale")
 #setwd("~/Uni/(M.Sc.) 3. Semester/Statistical Consulting/Minke whale project")
 whaledata <- read.csv("whale_data_cleaned.csv")
-whaledata <- read.csv("whale_data_cleaned_k2000.csv")
-whaledata <- read.csv("whale_data_cleaned_k2000_speed.csv")
+#whaledata <- read.csv("whale_data_cleaned_k2000.csv")
+#whaledata <- read.csv("whale_data_cleaned_k2000_speed.csv")
 
 #obs <- whaledata[(7:3583), c(5, 7, 8, 13, 14)]
 #obs <- obs[(obs$divetim > 1),]

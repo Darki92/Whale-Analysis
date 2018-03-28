@@ -194,7 +194,7 @@ mods<-vector("list")
 for (k in 1:10){
   mods[[k]] <- mle(obs, c(runif(2, 1, 250)), c(runif(2, 1, 120)), c(runif(2, 1, 600)), c(runif(2, 1, 1000)),
                    c(runif(2, 1, 100)), c(runif(2, 1, 50)), c(runif(2, 1, 100)), c(runif(2, 1, 500)), 
-                   c(runif(2, 0, 1)), c(runif(2, 0, 1)), 2)
+                   c(runif(2, 0, 1)), 2)
   llks[k] <- -mods[[k]]$mllk #minimum
 }
 mods[[which.max(llks)]]

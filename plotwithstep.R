@@ -16,10 +16,10 @@ z<-seq(0,600,by=0.01)
 lines(z,model2_step$delta[1]*dgamma(z,shape=model2_step$mu1[1]^2/model2_step$sigma1[1]^2,scale=model2_step$sigma1[1]^2/model2_step$mu1[1]),col=colpal[1],lwd=2)
 lines(z,model2_step$delta[2]*dgamma(z,shape=model2_step$mu1[2]^2/model2_step$sigma1[2]^2,scale=model2_step$sigma1[2]^2/model2_step$mu1[2]),col=colpal[2],lwd=2)
 
-hist(obs2$maxdep+5,probability=TRUE,breaks = 100, xlim = c(0, 120), xlab = 'maximum depth (in m)', main = 'state-dependent distribution maximum depth')
+hist(obs2$maxdep,probability=TRUE,breaks = 100, xlim = c(0, 120), xlab = 'maximum depth (in m)', main = 'state-dependent distribution maximum depth')
 z<-seq(5,120,by=0.01)
-lines(z,model2_step$delta[1]*dgamma(z-5,shape=model2_step$mu2[1]^2/model2_step$sigma2[1]^2,scale=model2_step$sigma2[1]^2/model2_step$mu2[1]),col=colpal[1],lwd=2)
-lines(z,model2_step$delta[2]*dgamma(z-5,shape=model2_step$mu2[2]^2/model2_step$sigma2[2]^2,scale=model2_step$sigma2[2]^2/model2_step$mu2[2]),col=colpal[2],lwd=2)
+lines(z,model2_step$delta[1]*dgamma(z,shape=model2_step$mu2[1]^2/model2_step$sigma2[1]^2,scale=model2_step$sigma2[1]^2/model2_step$mu2[1]),col=colpal[1],lwd=2)
+lines(z,model2_step$delta[2]*dgamma(z,shape=model2_step$mu2[2]^2/model2_step$sigma2[2]^2,scale=model2_step$sigma2[2]^2/model2_step$mu2[2]),col=colpal[2],lwd=2)
 
 hist(obs2$postdive.dur,probability=TRUE,breaks = 1000, xlim = c(0, 250), ylim = c(0, 0.05), xlab = 'postdive duration (in s)', main = 'state-dependent distribution postdive duration')
 z<-seq(0,250,by=0.01)
@@ -42,9 +42,9 @@ lines(z,model3_step$delta[3]*dgamma(z,shape=model3_step$mu1[3]^2/model3_step$sig
 
 hist(obs2$maxdep,probability=TRUE,breaks = 100, xlim = c(0, 120), xlab = 'maximum depth (in m)', main = 'state-dependent distribution maximum depth')
 z<-seq(5,120,by=0.01)
-lines(z,model3_step$delta[1]*dgamma(z-5,shape=model3_step$mu2[1]^2/model3_step$sigma2[1]^2,scale=model3_step$sigma2[1]^2/model3_step$mu2[1]),col=colpal[1],lwd=2)
-lines(z,model3_step$delta[2]*dgamma(z-5,shape=model3_step$mu2[2]^2/model3_step$sigma2[2]^2,scale=model3_step$sigma2[2]^2/model3_step$mu2[2]),col=colpal[2],lwd=2)
-lines(z,model3_step$delta[3]*dgamma(z-5,shape=model3_step$mu2[3]^2/model3_step$sigma2[3]^2,scale=model3_step$sigma2[3]^2/model3_step$mu2[3]),col=colpal[3],lwd=2)
+lines(z,model3_step$delta[1]*dgamma(z,shape=model3_step$mu2[1]^2/model3_step$sigma2[1]^2,scale=model3_step$sigma2[1]^2/model3_step$mu2[1]),col=colpal[1],lwd=2)
+lines(z,model3_step$delta[2]*dgamma(z,shape=model3_step$mu2[2]^2/model3_step$sigma2[2]^2,scale=model3_step$sigma2[2]^2/model3_step$mu2[2]),col=colpal[2],lwd=2)
+lines(z,model3_step$delta[3]*dgamma(z,shape=model3_step$mu2[3]^2/model3_step$sigma2[3]^2,scale=model3_step$sigma2[3]^2/model3_step$mu2[3]),col=colpal[3],lwd=2)
 
 hist(obs2$postdive.dur,probability=TRUE,breaks = 1000, xlim = c(0, 250), ylim = c(0, 0.05), xlab = 'postdive duration (in s)', main = 'state-dependent distribution postdive duration')
 z<-seq(0,250,by=0.01)
@@ -54,9 +54,9 @@ lines(z,model3_step$delta[2]*dgamma(z,shape=model3_step$mu3[3]^2/model3_step$sig
 
 hist(obs2$step,probability=TRUE,breaks = 500, xlim = c(0, 100), xlab = 'step length (in m)', main = 'state-dependent distribution step length')
 z<-seq(0,100,by=0.01)
-lines(z,model3_step$delta[1]*(model3_step$pi[1] + (1-model3_step$pi[1])*dgamma(z,shape=model3_step$mu4[1]^2/model3_step$sigma4[1]^2,scale=model3_step$sigma4[1]^2/model3_step$mu4[1])),col=colpal[1],lwd=2)
-lines(z,model3_step$delta[2]*(model3_step$pi[2] + (1-model3_step$pi[2])*dgamma(z,shape=model3_step$mu4[2]^2/model3_step$sigma4[2]^2,scale=model3_step$sigma4[2]^2/model3_step$mu4[2])),col=colpal[2],lwd=2)
-lines(z,model3_step$delta[3]*(model3_step$pi[3] + (1-model3_step$pi[3])*dgamma(z,shape=model3_step$mu4[3]^2/model3_step$sigma4[3]^2,scale=model3_step$sigma4[3]^2/model3_step$mu4[3])),col=colpal[3],lwd=2)
+lines(z,model3_step$delta[1]*dgamma(z,shape=model3_step$mu4[1]^2/model3_step$sigma4[1]^2,scale=model3_step$sigma4[1]^2/model3_step$mu4[1]),col=colpal[1],lwd=2)
+lines(z,model3_step$delta[2]*dgamma(z,shape=model3_step$mu4[2]^2/model3_step$sigma4[2]^2,scale=model3_step$sigma4[2]^2/model3_step$mu4[2]),col=colpal[2],lwd=2)
+lines(z,model3_step$delta[3]*dgamma(z,shape=model3_step$mu4[3]^2/model3_step$sigma4[3]^2,scale=model3_step$sigma4[3]^2/model3_step$mu4[3]),col=colpal[3],lwd=2)
 
 
 

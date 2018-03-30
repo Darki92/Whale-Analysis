@@ -89,7 +89,7 @@ lines(z,model4$delta[4]*dgamma(z,shape=model4$mu3[4]^2/model4$sigma3[4]^2,scale=
 #################################################
 # Viterbi algorithm
 # N = 2
-viterbi<-function(obs, mu1, mu2, mu3, sigma1, sigma2, sigma3, gamma, delta, N){
+viterbi<-function(obs, mu1, mu2, mu3, mu4, sigma1, sigma2, sigma3, sigma4, gamma, delta, N){
   n <- length(obs$divetim)
   
   mu.divetim <- mu1
@@ -98,6 +98,8 @@ viterbi<-function(obs, mu1, mu2, mu3, sigma1, sigma2, sigma3, gamma, delta, N){
   sigma.maxdep <- sigma2
   mu.postdive.dur <- mu3
   sigma.postdive.dur <- sigma3
+  mu.step <- mu4
+  sigma.step <- sigma4
   gamma <- matrix(gamma,N)
   delta <- c(delta)
   
@@ -111,8 +113,10 @@ viterbi<-function(obs, mu1, mu2, mu3, sigma1, sigma2, sigma3, gamma, delta, N){
   }
   for (j in 1:N){
     allprobs[,j] <-
-      dgamma(obs$divetim, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j])*
+      (pgamma(obs$divetim+0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j])
+      -pgamma(obs$divetim-0.5, shape = mu.divetim[j]^2/sigma.divetim[j]^2, scale = sigma.divetim[j]^2/mu.divetim[j]))*
       dgamma(obs$maxdep, shape = mu.maxdep[j]^2/sigma.maxdep[j]^2, scale = sigma.maxdep[j]^2/mu.maxdep[j])*
+      dgamma(obs$step, shape = mu.step[j]^2/sigma.step[j]^2, scale = sigma.step[j]^2/mu.step[j])*
       ma[,j]
   }
   
@@ -137,18 +141,18 @@ obs2 <- obs[(obs$postdive.dur < 1800),]
 #################################
 # Viterbi algorithm
 # N = 2
-states2 <- viterbi(obs_new2, c(model2$mu1), c(model2$mu2), c(model2$mu3), 
-        c(model2$sigma1), c(model2$sigma2), c(model2$sigma3),
+states2 <- viterbi(obs_new2, c(model2$mu1), c(model2$mu2), c(model2$mu3), c(model2$mu4), 
+        c(model2$sigma1), c(model2$sigma2), c(model2$sigma3), c(model2$sigma4)
         c(model2$gamma), c(model2$delta), 2)
 
 # N = 3
-states3 <- viterbi(obs_new2, c(model3$mu1), c(model3$mu2), c(model3$mu3), 
-                   c(model3$sigma1), c(model3$sigma2), c(model3$sigma3),
+states3 <- viterbi(obs_new2, c(model3$mu1), c(model3$mu2), c(model3$mu3), c(model3$mu4),
+                   c(model3$sigma1), c(model3$sigma2), c(model3$sigma3), c(model3$sigma4)
                    c(model3$gamma), c(model3$delta), 3)
 
 # N = 4
-states4 <- viterbi(obs_new2, c(model4$mu1), c(model4$mu2), c(model4$mu3), 
-                   c(model4$sigma1), c(model4$sigma2), c(model4$sigma3),
+states4 <- viterbi(obs_new2, c(model4$mu1), c(model4$mu2), c(model4$mu3), c(model4$mu4),
+                   c(model4$sigma1), c(model4$sigma2), c(model4$sigma3), c(model4$sigma4)
                    c(model4$gamma), c(model4$delta), 4)
 
 
@@ -164,6 +168,7 @@ col2[which(col2 == 2)] <- colpal[2]
 plot(obs_new2$divetim, type = 'h', col= col2, xlab = 'dives', ylab = 'divetime (in s)', main = 'Viterbi color-coded divetimes')
 plot(obs_new2$maxdep, type = 'h', col=col2, xlab = 'dives', ylab = 'maximum depth (in m)', main = 'Viterbi color-coded maximum depths')
 plot(obs_new2$postdive.dur, type = 'h', col=col2, xlab = 'dives', ylab = 'postdive duration (in s)', main = 'Viterbi color-coded postdive durations')
+plot(obs_new2$step, type = 'h', col=col2, xlab = 'dives', ylab = 'step length (in m)', main = 'Viterbi color-coded step length')
 
 
 # 3 states
@@ -175,6 +180,7 @@ col3[which(col3 == 3)] <- colpal[3]
 plot(obs_new2$divetim, type = 'h', col= col3, xlab = 'dives', ylab = 'divetime (in s)', main = 'Viterbi color-coded divetimes')
 plot(obs_new2$maxdep, type = 'h', col=col3, xlab = 'dives', ylab = 'maximum depth (in m)', main = 'Viterbi color-coded maximum depths')
 plot(obs_new2$postdive.dur, type = 'h', col=col3, xlab = 'Dives', ylab = 'postdive duration (in s)', main = 'Viterbi color-coded postdive durations')
+plot(obs_new2$step, type = 'h', col=col3, xlab = 'dives', ylab = 'step length (in m)', main = 'Viterbi color-coded step length')
 
 
 # 4 states
@@ -187,6 +193,7 @@ col4[which(col4 == 4)] <- colpal[4]
 plot(obs_new2$divetim, type = 'h', col= col4, xlab = 'Dives', ylab = 'Divetime (in s)', main = 'Viterbi Color-coded Divetimes')
 plot(obs_new2$maxdep, type = 'h', col=col4, xlab = 'Dives', ylab = 'Maximum Depth (in m)', main = 'Viterbi Color-coded Maximum Depths')
 plot(obs_new2$postdive.dur, type = 'h', col=col4, xlab = 'Dives', ylab = 'Postdive Duration (in s)', main = 'Viterbi Color-coded Postdive Durations')
+plot(obs_new2$step, type = 'h', col=col4, xlab = 'dives', ylab = 'step length (in m)', main = 'Viterbi color-coded step length')
 
 
 
